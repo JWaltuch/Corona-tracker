@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { useSpring, animated } from 'react-spring';
 import PropTypes from 'prop-types';
@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 import { useDrag } from 'react-use-gesture';
 import actions from '../redux/actions/actions';
 import noSelectCss from '../css/noSelect';
+import DeletionDialog from './DeletionDialog';
 
 const useStyles = makeStyles({
   ...noSelectCss,
@@ -48,12 +49,13 @@ const useStyles = makeStyles({
 const WeeklyTracker = props => {
   const { children, setToggleValue, setDetailData } = props;
   const classes = useStyles();
-  let swiped = false;
+  let swipedRight = false;
+  const [swipedLeft, setSwipedLeft] = useState(false);
 
   const [{ x }, set] = useSpring(() => ({
     x: 0,
     onRest: () => {
-      if (swiped) {
+      if (swipedRight) {
         // After swipe animation finishes, show survey details
         setDetailData([children.props.dayData]);
         setToggleValue('myHealthLog');
@@ -64,16 +66,23 @@ const WeeklyTracker = props => {
   const bind = useDrag(
     ({ down, movement: [mx], swipe: [swipeX] }) => {
       if (swipeX === 1) {
-        // User swiped
+        // User swiped right
         set({ x: window.innerWidth });
-        swiped = true;
+        swipedRight = true;
+        return;
+      }
+
+      if (swipeX === -1) {
+        // User swiped left
+        set({ x: window.innerWidth });
+        setSwipedLeft(true);
         return;
       }
 
       // Don't allow user to drag off the left side of the screen
-      if (mx < 0) {
-        return;
-      }
+      // if (mx < 0) {
+      //   return;
+      // }
 
       set({ x: down ? mx : 0, immediate: down });
     },
@@ -82,6 +91,7 @@ const WeeklyTracker = props => {
 
   return (
     <div className={classes.noSelect}>
+      {swipedLeft && <DeletionDialog setSwipedLeft={setSwipedLeft} observation={children.props.dayData} />}
       <animated.div className={classes.item}>
         <animated.div {...bind()} className={classes.fg} style={{ x }}>
           {children}
