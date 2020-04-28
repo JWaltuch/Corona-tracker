@@ -3,10 +3,9 @@ import { createMuiTheme, ThemeProvider, CssBaseline } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useBlockstack } from 'react-blockstack';
 import PropTypes from 'prop-types';
-import { ReactComponent as Logo } from '../img/Logo_CORONATRACKER_Logo.svg';
-import { ReactComponent as TextLogo } from '../img/Logo_CORONATRACKER_Text_Logo.svg';
 import NavBar from './NavBar';
 import Login from './Login';
+import { FullLogo } from '../utils/imgUrl';
 
 const theme = createMuiTheme({
   overrides: {
@@ -22,7 +21,13 @@ const theme = createMuiTheme({
         fontSize: 'inherit',
       },
     },
+    MuiList: {
+      root: {
+        backgroundColor: '#bbcef9',
+      },
+    },
   },
+
   palette: {
     primary: {
       light: '#c8d7fa',
@@ -99,6 +104,7 @@ const theme = createMuiTheme({
     },
   },
 });
+
 const useStyles = makeStyles(() => ({
   '@global': {
     'html, body, #root': {
@@ -106,6 +112,7 @@ const useStyles = makeStyles(() => ({
     },
   },
   root: {
+    scroll: 'hidden',
     position: 'fixed',
     fontFamily: 'Helvetica Neue',
     textAlign: 'center',
@@ -115,24 +122,15 @@ const useStyles = makeStyles(() => ({
     height: '100vh',
     overflowX: 'hidden',
     margin: '0px',
-    paddingBottom: '150px',
+    paddingTop: '3vh',
   },
-  logo: {
-    width: '75px',
-    height: '75px',
-    // this is for small devices, theme media query there are (sm, md and lg)
-    [theme.breakpoints.up('md')]: {
-      width: '100px',
+  fullLogo: {
+    width: '90vw',
+    height: '10vh',
 
-      height: '100px',
-    },
-  },
-  textLogo: {
-    width: '17em',
-    height: '6em',
     [theme.breakpoints.up('md')]: {
-      width: '30em',
-      height: '8em',
+      width: '70vh',
+      height: '6vh',
     },
   },
 }));
@@ -147,9 +145,9 @@ const Layout = props => {
         {authenticated ? (
           <div>
             <div id="content" className={classes.root}>
-              <Logo className={classes.logo} />
-              <TextLogo className={classes.textLogo} />
-
+              {/* <object title="logo" className={classes.logo} data={Logo} type="image/svg+xml" />
+              <object title="logoText" className={classes.textLogo} data={TextLogo} type="image/svg+xml" /> */}
+              <object title="fullLogo" className={classes.fullLogo} data={FullLogo} type="image/svg+xml" />
               {children}
             </div>
             <div>

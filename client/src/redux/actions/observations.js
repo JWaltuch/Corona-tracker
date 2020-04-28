@@ -1,7 +1,29 @@
-import { getObservations, postObservationsList, postSingleObservation } from '../../utils/blockstackHelpers';
+/* eslint-disable no-console */
+
+import {
+  getObservations,
+  postObservationsList,
+  postSingleObservation,
+  deleteObservationsList,
+  deleteObservationFiles,
+} from '../../utils/blockstackHelpers';
 
 export const ADD_OBSERVATION = 'ADD_OBSERVATION';
+export const DELETE_OBSERVATIONS = 'DELETE_OBSERVATIONS';
 export const FETCH_OBSERVATIONS = 'FETCH_OBSERVATIONS';
+
+export function resetObservations() {
+  return {
+    type: DELETE_OBSERVATIONS,
+  };
+}
+
+export function addObservationToStore(observation) {
+  return {
+    type: ADD_OBSERVATION,
+    payload: observation,
+  };
+}
 
 export const addObservation = (userSession, observation) => async dispatch => {
   const obs = await getObservations(userSession);
@@ -17,9 +39,24 @@ export const addObservation = (userSession, observation) => async dispatch => {
   postObservationsList(userSession, obsArray, fileNumber).then(didPost => {
     if (didPost) {
       postSingleObservation(userSession, observation, fileNumber);
-      dispatch({ type: ADD_OBSERVATION, payload: observation });
+      dispatch(addObservationToStore(observation));
     }
   });
+};
+
+export const deleteObservations = userSession => async dispatch => {
+  const obs = await getObservations(userSession);
+  if (obs) {
+    const obsArray = JSON.parse(obs);
+    const numOfObservations = obsArray.length;
+    deleteObservationsList(userSession)
+      .then(() => {
+        deleteObservationFiles(userSession, numOfObservations);
+        dispatch(resetObservations());
+        return 200;
+      })
+      .catch(err => console.error(err));
+  }
 };
 
 export const fetchObservations = userSession => async dispatch => {

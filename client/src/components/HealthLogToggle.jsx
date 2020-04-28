@@ -1,21 +1,20 @@
 import React, { useCallback } from 'react';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Button from '@material-ui/core/Button';
-import Container from '@material-ui/core/Container';
 import { Trans } from 'react-i18next';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core';
 import MyHealthLog from './MyHealthLog';
-import Table from './Table';
 import actions from '../redux/actions/actions';
 import buttonsCss from '../css/buttons';
+import ShowMeMore from './showMeMore/ShowMeContainer';
 
 const useStyles = makeStyles({
   buttons: {
     ...buttonsCss.buttons,
     margin: '0px 8px 2px 8px',
-    width: '160px',
+    width: '150px',
   },
 });
 
@@ -25,23 +24,23 @@ const HealthLogToggle = props => {
 
   const onShowMeMoreClick = useCallback(() => {
     setDetailData(observations);
-    setToggleValue('myHealthLog');
+    setToggleValue('showMeMore');
   }, [observations, setDetailData, setToggleValue]);
 
   return (
     <div>
-      <Container>
+      <div>
         <ButtonGroup size="medium" aria-label="outlined button group">
-          <Button onClick={() => setToggleValue('showMeMore')} className={classes.buttons}>
+          <Button onClick={() => setToggleValue('myHealthLog')} className={classes.buttons}>
             <Trans i18nKey="health.logButton" />
           </Button>
           <Button onClick={onShowMeMoreClick} className={classes.buttons}>
             <Trans i18nKey="health.showMoreButton" />
           </Button>
         </ButtonGroup>
-      </Container>
+      </div>
       {toggleValue === 'myHealthLog' && <MyHealthLog />}
-      {toggleValue === 'showMeMore' && <Table />}
+      {toggleValue === 'showMeMore' && <ShowMeMore />}
     </div>
   );
 };

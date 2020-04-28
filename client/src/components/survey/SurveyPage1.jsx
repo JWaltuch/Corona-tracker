@@ -1,17 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import {
-  Typography,
-  Slider,
-  ButtonGroup,
-  Button,
-  Grid,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  withStyles,
-} from '@material-ui/core';
+import { Typography, Slider, Button, Grid, withStyles } from '@material-ui/core';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import buttonsCss from '../../css/buttons';
@@ -19,6 +8,7 @@ import actions from '../../redux/actions/actions';
 
 const useStyles = makeStyles(theme => ({
   root: {
+    padding: '16px 16px 10em 16px',
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 'auto',
@@ -26,44 +16,16 @@ const useStyles = makeStyles(theme => ({
     fontFamily: 'Nunito',
     maxWidth: theme.breakpoints.values.md,
     width: '92vw',
+    marginBottom: '8vh',
     [theme.breakpoints.up('sm')]: {
       width: '50%',
     },
-  },
-  controlLabels: {
-    marginLeft: -20,
-  },
-  buttons: {
-    ...buttonsCss.buttons,
-    width: '20vw',
-    height: '10vh',
-    margin: '1em',
   },
   continueButton: {
     ...buttonsCss.buttons,
     marginTop: '1vh',
     width: '50vw',
     maxWidth: '180px',
-  },
-  dialog: {
-    background: '#7a9cf9',
-  },
-  dialogText: {
-    color: 'white',
-    margin: '0 auto',
-  },
-  selectedButton: {
-    ...buttonsCss.buttons,
-    margin: '0.5em',
-  },
-  button: {
-    ...buttonsCss.buttons,
-    margin: '0.5em',
-    background: 'rgba(255,255,255,0.5)',
-    color: 'black',
-    '&:hover': {
-      ...buttonsCss.buttons,
-    },
   },
 }));
 
@@ -113,52 +75,40 @@ const marks = [
 ];
 
 const SurveyPage1 = props => {
-  const { setSurveyPage1, dailyfeeling, dailySymptomsFeeling, dailyComparedToYesterday } = props;
+  const {
+    setSurveyPage,
+    setSurveyPage1,
+    dailyfeeling,
+    dailySymptomsFeeling,
+    dailyComparedToYesterday,
+    surveyPage,
+    setCompleted,
+  } = props;
+
+  const surveyPage1 = {
+    dailyfeeling,
+    dailySymptomsFeeling,
+    dailyComparedToYesterday,
+  };
   const classes = useStyles();
-  const [open, setOpen] = useState(false);
-  const [todaySet, setTodaySet] = useState(dailyfeeling);
-  const [symptomsSet, setSymptomsSet] = useState(dailySymptomsFeeling);
-  const [comparedSet, setComparedSet] = useState(dailyComparedToYesterday);
-  const [todayFeeling, setTodayFeeling] = useState(dailyfeeling);
-  const [todaySymptoms, setTodaySymptoms] = useState(dailySymptomsFeeling);
-  const [comparedFeeling, setcomparedFeeling] = useState(dailyComparedToYesterday);
+  const [survey1, setSurvey1] = useState(surveyPage1);
 
-  const handlerTodayFeeling = e => {
-    setTodayFeeling(e);
-    setTodaySet(true);
-  };
+  useEffect(() => {
+    setSurveyPage1(survey1);
+    setCompleted(surveyPage);
+  }, [survey1, setSurveyPage1, setCompleted, surveyPage]);
 
-  const handlerTodaySymptoms = e => {
-    setTodaySymptoms(e);
-    setSymptomsSet(true);
-  };
-
-  const handlerComparedFeeling = e => {
-    setcomparedFeeling(e.toLowerCase());
-    setComparedSet(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
+  const handleAnswer = (val, name) => {
+    setSurvey1({ ...survey1, [name]: val });
   };
 
   const submitSurveyPage1 = async () => {
-    if (!todaySet || !symptomsSet || !comparedSet) {
-      setOpen(true);
-    } else {
-      const surveyPage1 = {
-        todayFeeling,
-        todaySymptoms,
-        comparedFeeling: comparedFeeling.toLowerCase(),
-      };
-
-      setSurveyPage1(surveyPage1);
-    }
+    setSurveyPage(surveyPage + 1);
   };
 
   return (
     <div className={classes.root}>
-      <Grid container justify="center" alignItems="center" spacing={3}>
+      <Grid container justify="center" alignItems="center" spacing={4}>
         <Grid item xs={12}>
           <Typography variant="h5">
             <b>Let&apos;s answer a few questions!</b>
@@ -169,91 +119,72 @@ const SurveyPage1 = props => {
             Be sure to answer truthfully and honestly so that your health record will be accurate and helpful
           </Typography>
         </Grid>
-        <Grid item xs={12}>
-          <Typography variant="subtitle1" id="discrete-slider" gutterBottom>
-            <b>Q1: How do you feel today?</b>
-          </Typography>
+        <Grid container spacing={3} direction="column" justify="space-between">
+          <Grid item xs={12}>
+            <Typography variant="subtitle1" id="today-feeling-slider" gutterBottom>
+              <b>Q1: How do you feel today?</b>
+            </Typography>
+          </Grid>
+          <Grid item xs={12}>
+            <WellnessSlider
+              onChange={(e, val) => handleAnswer(val, 'dailyfeeling')}
+              color="secondary"
+              value={dailyfeeling}
+              aria-labelledby="today-feeling-slider"
+              valueLabelDisplay="on"
+              step={0.5}
+              min={1}
+              max={5}
+              marks={marks}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12}>
-          <WellnessSlider
-            onChange={(e, val) => handlerTodayFeeling(val)}
-            color="secondary"
-            defaultValue={todayFeeling || 3}
-            aria-labelledby="discrete-slider"
-            valueLabelDisplay="on"
-            step={0.5}
-            min={1}
-            max={5}
-            marks={marks}
-          />
-
-          <Typography variant="subtitle1" id="discrete-slider" gutterBottom>
-            <b>Q2: How are your symptoms?</b>
-          </Typography>
+        <Grid container spacing={3} direction="column" justify="space-between">
+          <Grid item xs={12}>
+            <Typography variant="subtitle1" id="today-symptoms-slider" gutterBottom>
+              <b>Q2: How are your symptoms?</b>
+            </Typography>
+          </Grid>
+          <Grid item xs={12}>
+            <WellnessSlider
+              onChange={(e, val) => handleAnswer(val, 'dailySymptomsFeeling')}
+              color="secondary"
+              value={dailySymptomsFeeling}
+              aria-labelledby="today-symptoms-slider"
+              valueLabelDisplay="on"
+              step={0.5}
+              min={1}
+              max={5}
+              marks={marks}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12}>
-          <WellnessSlider
-            onChange={(e, val) => handlerTodaySymptoms(val)}
-            color="secondary"
-            defaultValue={todaySymptoms || 3}
-            aria-labelledby="discrete-slider"
-            valueLabelDisplay="on"
-            step={0.5}
-            min={1}
-            max={5}
-            marks={marks}
-          />
-
-          <Typography variant="subtitle1">
-            <b>Q3: How are your feeling compared to yesterday?</b>
-          </Typography>
+        <Grid container spacing={3} direction="column" justify="space-between">
+          <Grid item xs={12}>
+            <Typography variant="subtitle1" id="compared-feeling-slider" gutterBottom>
+              <b>Q3: How are your feeling compared to yesterday?</b>
+            </Typography>
+          </Grid>
+          <Grid item xs={12}>
+            <WellnessSlider
+              onChange={(e, val) => handleAnswer(val, 'dailyComparedToYesterday')}
+              color="secondary"
+              value={dailyComparedToYesterday}
+              aria-labelledby="compared-feeling-slider"
+              valueLabelDisplay="on"
+              step={0.5}
+              min={1}
+              max={5}
+              marks={marks}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12}>
-          <ButtonGroup color="secondary" aria-label="outlined primary button group">
-            <Button
-              className={comparedFeeling === 'worse' ? classes.selectedButton : classes.button}
-              variant="contained"
-              value="Worse"
-              onClick={e => handlerComparedFeeling(e.target.innerText)}
-            >
-              Worse
-            </Button>
-            <Button
-              className={comparedFeeling === 'the same' ? classes.selectedButton : classes.button}
-              variant="contained"
-              onClick={e => handlerComparedFeeling(e.target.innerText)}
-            >
-              The Same
-            </Button>
-            <Button
-              className={comparedFeeling === 'better' ? classes.selectedButton : classes.button}
-              variant="contained"
-              onClick={e => handlerComparedFeeling(e.target.innerText)}
-            >
-              Better
-            </Button>
-          </ButtonGroup>
-        </Grid>
-
         <Grid item xs={12}>
           <Button onClick={submitSurveyPage1} variant="outlined" color="secondary" className={classes.continueButton}>
             CONTINUE
           </Button>
         </Grid>
       </Grid>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogContent className={classes.dialog}>
-          <DialogContentText className={classes.dialogText}>Please complete:</DialogContentText>
-          {!todaySet ? <DialogContentText className={classes.dialogText}>Q1</DialogContentText> : null}
-          {!symptomsSet ? <DialogContentText className={classes.dialogText}>Q2</DialogContentText> : null}
-          {!comparedSet ? <DialogContentText className={classes.dialogText}>Q3</DialogContentText> : null}
-        </DialogContent>
-        <DialogActions className={classes.dialog}>
-          <Button onClick={handleClose} className={classes.dialogText}>
-            Okay
-          </Button>
-        </DialogActions>
-      </Dialog>
     </div>
   );
 };
@@ -262,13 +193,16 @@ SurveyPage1.propTypes = {
   setSurveyPage1: PropTypes.func.isRequired,
   dailyfeeling: PropTypes.number,
   dailySymptomsFeeling: PropTypes.number,
-  dailyComparedToYesterday: PropTypes.string,
+  dailyComparedToYesterday: PropTypes.number,
+  setSurveyPage: PropTypes.func.isRequired,
+  surveyPage: PropTypes.number.isRequired,
+  setCompleted: PropTypes.func.isRequired,
 };
 
 SurveyPage1.defaultProps = {
   dailyfeeling: 3,
   dailySymptomsFeeling: 3,
-  dailyComparedToYesterday: '',
+  dailyComparedToYesterday: 3,
 };
 
 const mapStateToProps = state => {
@@ -276,12 +210,15 @@ const mapStateToProps = state => {
     dailyfeeling: state.surveyReducer.survey.physical.dailyfeeling,
     dailySymptomsFeeling: state.surveyReducer.survey.physical.dailySymptomsFeeling,
     dailyComparedToYesterday: state.surveyReducer.survey.physical.dailyComparedToYesterday,
+    surveyPage: state.surveyReducer.surveyPage,
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
     setSurveyPage1: survey => dispatch(actions.setSurveyPage1(survey)),
+    setSurveyPage: page => dispatch(actions.setSurveyPage(page)),
+    setCompleted: page => dispatch(actions.setCompleted(page)),
   };
 };
 

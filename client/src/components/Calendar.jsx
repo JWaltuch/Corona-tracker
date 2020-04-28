@@ -10,19 +10,28 @@ import actions from '../redux/actions/actions';
 import WeeklyTracker from './WeeklyTracker';
 import WeeklyTrackerDay from './WeeklyTrackerDay';
 import '../css/Calendar.css';
-import calendarDotSvg from '../img/Calendar_Dot.svg';
+import { calendarDotSvg } from '../utils/imgUrl';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   appCalendar: {
     margin: '0 auto',
     width: '100vw',
+    [theme.breakpoints.up('md')]: {
+      width: '60vw',
+    },
     maxheight: '30%',
     backgroundColor: '#97b9f7',
     color: 'white',
     fontWeight: 'bold',
+
+    transition: 'box-shadow 0.75s',
+    boxShadow: '-10px 0 10px 0 #aaaaaa',
   },
   reactCalendar: {
     width: '100vw',
+    [theme.breakpoints.up('md')]: {
+      width: '60vw',
+    },
   },
   calendarTile: {
     paddingTop: '15px',
@@ -45,7 +54,7 @@ const useStyles = makeStyles({
     height: '5vh',
     border: 'none',
   },
-});
+}));
 
 const AppCalendar = props => {
   const { observations } = props;
@@ -72,35 +81,37 @@ const AppCalendar = props => {
   const calendarComponentRef = useRef(null);
 
   return (
-    <div className={classes.appCalendar}>
-      <Calendar
-        className={classes.reactCalendar}
-        onChange={handleDateClick}
-        tileClassName={({ date, view }) => {
-          const dateString = date.toLocaleDateString();
-          const tileClasses = [classes.calendarTile];
+    <>
+      <div className={classes.appCalendar}>
+        <Calendar
+          className={classes.reactCalendar}
+          onChange={handleDateClick}
+          tileClassName={({ date, view }) => {
+            const dateString = date.toLocaleDateString();
+            const tileClasses = [classes.calendarTile];
 
-          if (dateString === today) {
-            tileClasses.push(classes.today);
-          }
+            if (dateString === today) {
+              tileClasses.push(classes.today);
+            }
 
-          if (observations.find(observation => new Date(observation.date).toLocaleDateString() === dateString)) {
-            tileClasses.push(classes.completedSurvey);
-          }
+            if (observations.find(observation => new Date(observation.date).toLocaleDateString() === dateString)) {
+              tileClasses.push(classes.completedSurvey);
+            }
 
-          return tileClasses;
-        }}
-      />
-      {currentObservations.map((observation, index) => {
-        return (
-          <div key={observation.date} className={classes.day}>
-            <WeeklyTracker>
-              <WeeklyTrackerDay dayData={observation} />
-            </WeeklyTracker>
-          </div>
-        );
-      })}
-    </div>
+            return tileClasses;
+          }}
+        />
+        {currentObservations.map((observation, index) => {
+          return (
+            <div key={observation.date} className={classes.day}>
+              <WeeklyTracker>
+                <WeeklyTrackerDay dayData={observation} />
+              </WeeklyTracker>
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 };
 
